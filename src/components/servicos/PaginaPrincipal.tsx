@@ -22,6 +22,7 @@ export const PaginaPrincipal = () => {
         imagemPerfil: string;
         imagemIlustrativa: string;
         categoria: string;
+        destaqueSemana: boolean;
     }
 
     const [loading, setLoading] = useState(true);
@@ -102,6 +103,7 @@ export const PaginaPrincipal = () => {
             imagemIcone={fornecedor.imagemPerfil || imagem}
             subDescricao={fornecedor.sub_descricao}
             valor={fornecedor.valor}
+            destaqueSemana={fornecedor.destaqueSemana}
         />
     ));
 

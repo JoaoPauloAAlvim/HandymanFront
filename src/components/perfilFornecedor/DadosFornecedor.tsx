@@ -48,10 +48,8 @@ export const DadosFornecedor = ({ idFornecedor, usuario, onUpdate }: DadosFornec
     }, [usuario]);
 
     useEffect(() => {
-        if (onUpdate) {
-            onUpdate();
-        }
-    }, [idFornecedor]);
+        onUpdate();
+    }, []);
 
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, type: 'perfil' | 'ilustrativa') => {
         const file = event.target.files?.[0];
@@ -182,13 +180,16 @@ export const DadosFornecedor = ({ idFornecedor, usuario, onUpdate }: DadosFornec
                     <div className="w-full bg-gray-200 rounded-full h-6 mb-2">
                         <div
                             className="bg-[#A75C00] h-6 rounded-full transition-all duration-500"
-                            style={{ width: `${Math.min(100, Math.round((usuario.servicosConcluidosSemana / usuario.metaSemana) * 100))}%` }}
+                            style={{ width: `${usuario.servicosConcluidosSemana >= usuario.metaSemana ? 100 : Math.min(100, Math.round((usuario.servicosConcluidosSemana / usuario.metaSemana) * 100))}%` }}
                         ></div>
                     </div>
                     <div className="text-sm text-gray-700">
                         Você concluiu <span className="font-bold">{usuario.servicosConcluidosSemana}</span> de <span className="font-bold">{usuario.metaSemana}</span> serviços nesta semana.
                         {usuario.servicosConcluidosSemana >= usuario.metaSemana && (
-                            <span className="ml-2 text-green-600 font-semibold">Parabéns! Você ganhou o destaque da semana!</span>
+                            <span className="ml-2 text-green-600 font-semibold">
+                              {/* Troféu pode ser adicionado aqui se desejar */}
+                              Parabéns! Você ganhou o destaque da semana!
+                            </span>
                         )}
                     </div>
                 </div>

@@ -38,6 +38,7 @@ export type typeFornecedor = {
     media_avaliacoes: number;
     servicosConcluidosSemana?: number;
     metaSemana?: number;
+    destaqueSemana?: boolean;
 }
 
 interface PerfilProps {

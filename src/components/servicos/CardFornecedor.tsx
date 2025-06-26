@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { FaTrophy } from "react-icons/fa";
 
 interface CardProps {
     id:string;
@@ -9,6 +10,7 @@ interface CardProps {
     imagemIcone: string;
     subDescricao: string;
     valor: string;
+    destaqueSemana?: boolean;
 }
 
 
@@ -21,7 +23,8 @@ export const CardFornecedor = ({
     descricao,
     imagemIcone,
     subDescricao,
-    valor
+    valor,
+    destaqueSemana
 }: CardProps): JSX.Element => {
     const navigate = useNavigate();
 
@@ -41,7 +44,7 @@ export const CardFornecedor = ({
 
             <div className="flex items-center gap-2 px-4 mt-4">
                 <img onClick={() => handleNavigation(id)} src={imagemIcone} alt="Ícone do fornecedor" className="w-8 h-8 rounded-full" />
-                <p className="font-semibold">{nome}</p>
+                <p className="font-semibold flex items-center">{nome} {destaqueSemana && <FaTrophy className="text-yellow-500 ml-2" title="Destaque da Semana" />}</p>
                 <p className="ml-auto font-medium text-sm text-gray-700">{formatarAvaliacao(avaliacao)} <span className="text-yellow-400">★</span></p>
             </div>
 
