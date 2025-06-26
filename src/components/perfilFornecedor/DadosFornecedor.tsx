@@ -47,6 +47,12 @@ export const DadosFornecedor = ({ idFornecedor, usuario, onUpdate }: DadosFornec
         }
     }, [usuario]);
 
+    useEffect(() => {
+        if (onUpdate) {
+            onUpdate();
+        }
+    }, [idFornecedor]);
+
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, type: 'perfil' | 'ilustrativa') => {
         const file = event.target.files?.[0];
         if (file) {
@@ -164,8 +170,29 @@ export const DadosFornecedor = ({ idFornecedor, usuario, onUpdate }: DadosFornec
         thumbnail: url,
     }));
 
+    // Log para depuração
+    console.log('usuario recebido em DadosFornecedor:', usuario);
+
     return (
         <div className="p-6 bg-white rounded-lg shadow-sm">
+            {/* Barra de Progresso de Destaque Semanal */}
+            {usuario && usuario.servicosConcluidosSemana != null && usuario.metaSemana != null && (
+                <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-[#A75C00] mb-2">Progresso para Destaque da Semana</h3>
+                    <div className="w-full bg-gray-200 rounded-full h-6 mb-2">
+                        <div
+                            className="bg-[#A75C00] h-6 rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(100, Math.round((usuario.servicosConcluidosSemana / usuario.metaSemana) * 100))}%` }}
+                        ></div>
+                    </div>
+                    <div className="text-sm text-gray-700">
+                        Você concluiu <span className="font-bold">{usuario.servicosConcluidosSemana}</span> de <span className="font-bold">{usuario.metaSemana}</span> serviços nesta semana.
+                        {usuario.servicosConcluidosSemana >= usuario.metaSemana && (
+                            <span className="ml-2 text-green-600 font-semibold">Parabéns! Você ganhou o destaque da semana!</span>
+                        )}
+                    </div>
+                </div>
+            )}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-semibold text-[#A75C00]">Dados do Perfil</h2>
                 <button
