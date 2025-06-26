@@ -20,6 +20,7 @@ export type typeUsuario = {
     autenticacaoVia: string;
     historico_servicos: string[];
     telefone: string;
+    media_avaliacoes?: number;
 }
 
 export const PerfilUsuario = ({ id }: PerfilProps) => {

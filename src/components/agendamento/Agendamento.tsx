@@ -21,6 +21,7 @@ export const Agendamento = ({ idFornecedor }: AgendamentoProps) => {
   const socketRef = useRef<Socket | null>(null);
 
   const token = useGetToken();
+  const [mediaAvaliacoes, setMediaAvaliacoes] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     categoria: "",
@@ -50,6 +51,16 @@ export const Agendamento = ({ idFornecedor }: AgendamentoProps) => {
   useEffect(() => {
     buscarCategoria();
   }, [])
+
+  useEffect(() => {
+    if (token?.id) {
+      axios.get(`${URLAPI}/usuarios/buscar-id/${token.id}`)
+        .then(res => {
+          setMediaAvaliacoes(res.data.media_avaliacoes ?? null);
+        })
+        .catch(() => setMediaAvaliacoes(null));
+    }
+  }, [token?.id]);
 
   // Inicializa o socket
   useEffect(() => {

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Loading } from '../Loading';
 import { URLAPI } from '../../constants/ApiUrl';
+import { jwtDecode } from 'jwt-decode';
 
 
 
@@ -25,25 +26,33 @@ export const LoginFornecedor = () => {
         navigate('/login');
       };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Aciona o loading
         setIsLoading(true);
-
-        axios.post(`${URLAPI}/fornecedor/login`, {
-            email,
-            senha,
-        })
-            .then((response) => {
-                setIsLoading(false);
-                // Aqui você pode armazenar o token de autenticação ou qualquer outra informação necessária
-                localStorage.setItem('token', response.data.token); // Armazenando o token no localStorage
-                navigate('/'); // Redireciona para a página inicial após o login
-            })
-            .catch((error) => {
-                setIsLoading(false);
-                setError(error.response.data.error);
-            })
+        try {
+            const response = await axios.post(`${URLAPI}/fornecedor/login`, {
+                email,
+                senha,
+            });
+            setIsLoading(false);
+            const token = response.data.token;
+            localStorage.setItem('token', token);
+            // Decodifica o token para pegar o id
+            const decoded: any = jwtDecode(token);
+            // Busca o fornecedor pelo id para pegar a média de avaliações
+            const fornecedorResp = await axios.get(`${URLAPI}/fornecedor/${decoded.id}`);
+            const media = fornecedorResp.data.media_avaliacoes;
+            if (typeof media === 'number' && media <= 2) {
+                setError('Sua conta foi bloqueada devido à baixa avaliação. Entre em contato com o suporte.');
+                localStorage.removeItem('token');
+                setTimeout(() => navigate('/login-fornecedor'), 2000);
+                return;
+            }
+            navigate('/');
+        } catch (error: any) {
+            setIsLoading(false);
+            setError(error.response?.data?.error || 'Erro ao fazer login');
+        }
     };
 
     return (

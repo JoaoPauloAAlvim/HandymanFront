@@ -22,6 +22,7 @@ export interface Solicitacao {
       valor?: number;
       id_pagamento?: string;
       id_avaliacao?: string;
+      avaliado: boolean;
   };
   usuario: {
       id_usuario: string;
@@ -29,5 +30,6 @@ export interface Solicitacao {
       picture: string;
       email: string;
       telefone: string;
+      media_avaliacoes?: number;
   };
 }

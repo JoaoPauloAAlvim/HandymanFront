@@ -12,6 +12,7 @@ import io from 'socket.io-client';
 import { Socket } from 'socket.io-client';
 import { Modal } from "../Modal";
 import Chat from "../Chat";
+import { avaliarCliente } from '../../services/avaliacaoClienteService';
 
 interface ExibirAgendamentoFornecedorProps {
     idServico: string;
@@ -50,6 +51,9 @@ export const ExibirAgendamentoFornecedor = ({ idServico }: ExibirAgendamentoForn
     const [id_servico, setIdServico] = useState("");
     const navigate = useNavigate();
     const socketRef = useRef<Socket | null>(null);
+    const [showAvaliacaoModal, setShowAvaliacaoModal] = useState(false);
+    const [notaAvaliacao, setNotaAvaliacao] = useState(5);
+    const [comentarioAvaliacao, setComentarioAvaliacao] = useState('');
 
     const handleOpenChat = (idServico: string) => {
         setIdServico(idServico);
@@ -203,6 +207,26 @@ export const ExibirAgendamentoFornecedor = ({ idServico }: ExibirAgendamentoForn
         }
     };
 
+    const handleAvaliarCliente = async () => {
+        if (!agendamento) return;
+        try {
+            await avaliarCliente({
+                id_servico: agendamento.id_servico,
+                id_fornecedor: agendamento.id_fornecedor,
+                id_usuario: agendamento.id_usuario,
+                nota: notaAvaliacao,
+                comentario: comentarioAvaliacao,
+            });
+            toast.success('Avaliação enviada com sucesso!');
+            setShowAvaliacaoModal(false);
+            setNotaAvaliacao(5);
+            setComentarioAvaliacao('');
+            fetchAgendamento();
+        } catch (error) {
+            toast.error('Erro ao enviar avaliação do cliente');
+        }
+    };
+
     if (loading) {
         return <Loading />;
     }
@@ -247,9 +271,28 @@ export const ExibirAgendamentoFornecedor = ({ idServico }: ExibirAgendamentoForn
                                 />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-semibold text-gray-800">
-                                    {agendamento.usuario?.nome}
-                                </h3>
+                                {agendamento.usuario && (
+                                    <>
+                                        <h3 className="text-2xl font-semibold text-gray-800">
+                                            {agendamento.usuario.nome}
+                                        </h3>
+                                        {agendamento.usuario.media_avaliacoes !== undefined && agendamento.usuario.media_avaliacoes !== null && (
+                                            <div className="flex items-center mt-1">
+                                                {[1,2,3,4,5].map((star) => (
+                                                    <svg
+                                                        key={star}
+                                                        className={`w-5 h-5 ${star <= Math.round(agendamento.usuario.media_avaliacoes as number) ? 'text-yellow-400' : 'text-gray-300'}`}
+                                                        fill="currentColor"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
+                                                    </svg>
+                                                ))}
+                                                <span className="ml-1 text-sm text-gray-600">{(agendamento.usuario.media_avaliacoes as number).toFixed(1)}</span>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                                 <p className="text-lg text-gray-500">{agendamento.categoria}</p>
                             </div>
                         </div>
@@ -445,6 +488,17 @@ export const ExibirAgendamentoFornecedor = ({ idServico }: ExibirAgendamentoForn
                                     </div>
 
                                 )}
+                                {(agendamento.status === 'Aguardando pagamento' || agendamento.status === 'concluido' || agendamento.status === 'Concluído') && !agendamento.avaliado && (
+                                    <button
+                                        onClick={() => setShowAvaliacaoModal(true)}
+                                        className="w-full bg-yellow-500 text-white py-2.5 rounded-lg font-medium hover:bg-yellow-600 transition-colors flex items-center justify-center mt-2"
+                                    >
+                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Avaliar Cliente
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -515,6 +569,55 @@ export const ExibirAgendamentoFornecedor = ({ idServico }: ExibirAgendamentoForn
                     </div>
                 </div>
             </Modal>
+            {/* Modal de Avaliação de Cliente */}
+            {showAvaliacaoModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                        <h3 className="text-xl font-semibold mb-4">Avaliar Cliente</h3>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 mb-2">Nota</label>
+                            <div className="flex space-x-1">
+                                {[1,2,3,4,5].map((star) => (
+                                    <button
+                                        key={star}
+                                        type="button"
+                                        onClick={() => setNotaAvaliacao(star)}
+                                        className={star <= notaAvaliacao ? 'text-yellow-400' : 'text-gray-300'}
+                                    >
+                                        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
+                                        </svg>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 mb-2">Comentário</label>
+                            <textarea
+                                value={comentarioAvaliacao}
+                                onChange={e => setComentarioAvaliacao(e.target.value)}
+                                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                placeholder="Deixe um comentário sobre o cliente..."
+                                rows={4}
+                            />
+                        </div>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowAvaliacaoModal(false)}
+                                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleAvaliarCliente}
+                                className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+                            >
+                                Enviar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
         
     );

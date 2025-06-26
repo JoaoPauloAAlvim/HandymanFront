@@ -17,8 +17,10 @@ export interface ServicoComUsuario {
         nome: string;
         email: string;
         telefone: string;
-        endereco:typeEndereco
+        endereco:typeEndereco;
+        media_avaliacoes?: number;
     } | null;
+    avaliado?: boolean;
 } 
 
 export type typeEndereco = {

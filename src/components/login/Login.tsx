@@ -67,25 +67,34 @@ export const Login = () => {
     // Exemplo: decoded.name, decoded.email, decoded.picture
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aciona o loading
     setIsLoading(true);
 
-    axios.post(`${URLAPI}/usuarios/login`, {
-      email,
-      senha,
-    })
-      .then((response) => {
-        setIsLoading(false);
-        // Aqui você pode armazenar o token de autenticação ou qualquer outra informação necessária
-        localStorage.setItem('token', response.data.token); // Armazenando o token no localStorage
-        navigate('/'); // Redireciona para a página inicial após o login
-      })
-      .catch((error) => {
-        setIsLoading(false);
-        setError(error.response.data.error);
-      })
+    try {
+      const response = await axios.post(`${URLAPI}/usuarios/login`, {
+        email,
+        senha,
+      });
+      setIsLoading(false);
+      const token = response.data.token;
+      localStorage.setItem('token', token);
+      // Decodifica o token para pegar o id
+      const decoded: any = jwtDecode(token);
+      // Busca o usuário pelo id para pegar a média de avaliações
+      const userResp = await axios.get(`${URLAPI}/usuarios/buscar-id/${decoded.id}`);
+      const media = userResp.data.media_avaliacoes;
+      if (typeof media === 'number' && media <= 2) {
+        setError('Sua conta foi bloqueada devido à baixa avaliação. Entre em contato com o suporte.');
+        localStorage.removeItem('token');
+        setTimeout(() => navigate('/login'), 2000);
+        return;
+      }
+      navigate('/');
+    } catch (error: any) {
+      setIsLoading(false);
+      setError(error.response?.data?.error || 'Erro ao fazer login');
+    }
   };
 
   return (
