@@ -84,7 +84,8 @@ export const Login = () => {
       // Busca o usuário pelo id para pegar a média de avaliações
       const userResp = await axios.get(`${URLAPI}/usuarios/buscar-id/${decoded.id}`);
       const media = userResp.data.media_avaliacoes;
-      if (typeof media === 'number' && media <= 2) {
+      const totalAvaliacoes = userResp.data.totalAvaliacoes || 0;
+      if (typeof media === 'number' && media <= 2 && totalAvaliacoes > 2) {
         setError('Sua conta foi bloqueada devido à baixa avaliação. Entre em contato com o suporte.');
         localStorage.removeItem('token');
         setTimeout(() => navigate('/login'), 2000);

@@ -42,7 +42,8 @@ export const LoginFornecedor = () => {
             // Busca o fornecedor pelo id para pegar a média de avaliações
             const fornecedorResp = await axios.get(`${URLAPI}/fornecedor/${decoded.id}`);
             const media = fornecedorResp.data.media_avaliacoes;
-            if (typeof media === 'number' && media <= 2) {
+            const totalAvaliacoes = fornecedorResp.data.totalAvaliacoes || 0;
+            if (typeof media === 'number' && media <= 2 && totalAvaliacoes > 2) {
                 setError('Sua conta foi bloqueada devido à baixa avaliação. Entre em contato com o suporte.');
                 localStorage.removeItem('token');
                 setTimeout(() => navigate('/login-fornecedor'), 2000);
