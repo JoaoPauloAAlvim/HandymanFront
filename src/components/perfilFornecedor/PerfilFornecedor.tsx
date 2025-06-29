@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Solicitacoes } from "./Solicitacoens";
 import { DadosFornecedor } from "./DadosFornecedor";
 import { URLAPI } from "../../constants/ApiUrl";
+import { useSocketConnection } from '../../hooks/useSocketConnection';
 
 
 export type typeEndereco = {
@@ -58,6 +59,12 @@ export const PerfilFornecedor = ({ idFornecedor }: PerfilProps) => {
             console.log(error);
         }
     };
+
+    // Hook para escutar eventos de destaque/reset e recarregar perfil
+    useSocketConnection({
+        onDestaqueAtualizado: procurarUsuario,
+        onFornecedoresResetados: procurarUsuario
+    });
 
     useEffect(() => {
         procurarUsuario();

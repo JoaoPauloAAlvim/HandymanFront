@@ -171,6 +171,12 @@ export const DadosFornecedor = ({ idFornecedor, usuario, onUpdate }: DadosFornec
     // Log para depuração
     console.log('usuario recebido em DadosFornecedor:', usuario);
 
+    // Cálculo seguro para barra e texto
+    const progresso = usuario && usuario.servicosConcluidosSemana ? Math.min(usuario.servicosConcluidosSemana, usuario.metaSemana ?? 10) : 0;
+    const progressoTexto = usuario && usuario.servicosConcluidosSemana > (usuario.metaSemana ?? 10) ? `${usuario.metaSemana ?? 10}+` : usuario?.servicosConcluidosSemana ?? 0;
+    const meta = usuario?.metaSemana ?? 10;
+    const barraPercent = usuario && usuario.servicosConcluidosSemana ? Math.min(100, Math.round((progresso / meta) * 100)) : 0;
+
     return (
         <div className="p-6 bg-white rounded-lg shadow-sm">
             {/* Barra de Progresso de Destaque Semanal */}
@@ -180,14 +186,13 @@ export const DadosFornecedor = ({ idFornecedor, usuario, onUpdate }: DadosFornec
                     <div className="w-full bg-gray-200 rounded-full h-6 mb-2">
                         <div
                             className="bg-[#A75C00] h-6 rounded-full transition-all duration-500"
-                            style={{ width: `${usuario.servicosConcluidosSemana >= usuario.metaSemana ? 100 : Math.min(100, Math.round((usuario.servicosConcluidosSemana / usuario.metaSemana) * 100))}%` }}
+                            style={{ width: `${barraPercent}%` }}
                         ></div>
                     </div>
                     <div className="text-sm text-gray-700">
-                        Você concluiu <span className="font-bold">{usuario.servicosConcluidosSemana}</span> de <span className="font-bold">{usuario.metaSemana}</span> serviços nesta semana.
-                        {usuario.servicosConcluidosSemana >= usuario.metaSemana && (
+                        Você concluiu <span className="font-bold">{progressoTexto}</span> de <span className="font-bold">{meta}</span> serviços nesta semana.
+                        {usuario.servicosConcluidosSemana >= meta && (
                             <span className="ml-2 text-green-600 font-semibold">
-                              {/* Troféu pode ser adicionado aqui se desejar */}
                               Parabéns! Você ganhou o destaque da semana!
                             </span>
                         )}

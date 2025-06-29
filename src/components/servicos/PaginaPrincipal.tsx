@@ -10,8 +10,11 @@ import imagemCategoriaLimpeza from '../../assets/cleaning_995053 1.png';
 import imagemCategoriaEncanador from '../../assets/pipe_4003199 1.png';
 import imagemCategoriaJardinagem from '../../assets/trimming_10144805 1.png';
 import { URLAPI } from "../../constants/ApiUrl";
+import { useSocketConnection } from "../../hooks/useSocketConnection";
 
 export const PaginaPrincipal = () => {
+    console.log('🏠 PaginaPrincipal sendo renderizada (Web)');
+    
     interface Fornecedor {
         id_fornecedor: string;
         nome: string;
@@ -33,6 +36,18 @@ export const PaginaPrincipal = () => {
     const itensPorPagina = 8;
 
     const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>("Controle");
+
+    // Hook para escutar eventos de destaque
+    useSocketConnection({
+        onDestaqueAtualizado: () => {
+            console.log('Evento de destaque recebido em PaginaPrincipal (Web)');
+            buscarFornecedores();
+        },
+        onFornecedoresResetados: () => {
+            console.log('Evento de reset recebido em PaginaPrincipal (Web)');
+            buscarFornecedores();
+        }
+    });
 
     const mudarCategorias = (categoria: string) => {
         setCategoriaSelecionada(categoria);
